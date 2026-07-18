@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>大学生学科竞赛组队与项目管理系统</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --primary-dark: #1746a2;
+      --success: #10b981;
+      --danger: #ef4444;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", PingFang SC, Microsoft YaHei, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+      margin-bottom: 20px;
+    }
+
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    .subtitle { margin: 0; color: rgba(255,255,255,0.9); }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .summary .box {
+      background: rgba(255,255,255,0.16);
+      padding: 14px;
+      border-radius: 14px;
+      backdrop-filter: blur(4px);
+    }
+
+    .summary .label { font-size: 13px; opacity: 0.9; }
+    .summary .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .card h2 { margin-top: 0; font-size: 20px; }
+
+    form { display: grid; gap: 12px; }
+    label { display: grid; gap: 6px; font-weight: 600; font-size: 14px; }
+    input, select, textarea, button {
+      font: inherit;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      outline: none;
+    }
+
+    textarea { min-height: 90px; resize: vertical; }
+
+    button {
+      cursor: pointer;
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-weight: 600;
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    button:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .secondary { background: #e5e7eb; color: var(--text); }
+    .secondary:hover { background: #d1d5db; }
+    .danger { background: var(--danger); }
+    .danger:hover { background: #dc2626; }
+
+    .list { display: grid; gap: 12px; margin-top: 16px; }
+    .item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: #fcfdff;
+    }
+
+    .item-header { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+    .item h3 { margin: 0 0 6px; font-size: 17px; }
+    .meta { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .empty {
+      padding: 18px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      color: var(--muted);
+      text-align: center;
+      background: #fafafa;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>大学生学科竞赛组队与项目管理系统</h1>
+      <p class="subtitle">快速管理队伍、成员和项目进度，适合课程作业或校园竞赛使用。</p>
+      <div class="summary">
+        <div class="box">
+          <div class="label">队伍数量</div>
+          <div class="value" id="teamCount">0</div>
+        </div>
+        <div class="box">
+          <div class="label">项目数量</div>
+          <div class="value" id="projectCount">0</div>
+        </div>
+        <div class="box">
+          <div class="label">待推进项目</div>
+          <div class="value" id="progressCount">0</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>创建队伍</h2>
+        <form id="teamForm">
+          <label>队伍名称
+            <input type="text" name="teamName" placeholder="例如：AI创新小队" required />
+          </label>
+          <label>队长姓名
+            <input type="text" name="captain" placeholder="请输入队长姓名" required />
+          </label>
+          <label>竞赛方向
+            <select name="category">
+              <option value="人工智能">人工智能</option>
+              <option value="数学建模">数学建模</option>
+              <option value="软件创新">软件创新</option>
+              <option value="电子设计">电子设计</option>
+              <option value="其他">其他</option>
+            </select>
+          </label>
+          <label>成员名单
+            <input type="text" name="members" placeholder="多个成员用逗号分隔" required />
+          </label>
+          <label>说明
+            <textarea name="description" placeholder="简要说明队伍目标或特点"></textarea>
+          </label>
+          <button type="submit">保存队伍</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>项目管理</h2>
+        <form id="projectForm">
+          <label>项目名称
+            <input type="text" name="projectName" placeholder="例如：智能推荐系统" required />
+          </label>
+          <label>所属队伍
+            <select name="teamId" id="teamSelect" required></select>
+          </label>
+          <label>项目阶段
+            <select name="stage">
+              <option value="立项">立项</option>
+              <option value="调研">调研</option>
+              <option value="开发">开发</option>
+              <option value="测试">测试</option>
+              <option value="答辩">答辩</option>
+            </select>
+          </label>
+          <label>截止时间
+            <input type="date" name="deadline" required />
+          </label>
+          <label>项目描述
+            <textarea name="description" placeholder="描述项目内容与目标"></textarea>
+          </label>
+          <button type="submit">保存项目</button>
+        </form>
+      </section>
+    </div>
+
+    <div class="grid" style="margin-top: 20px;">
+      <section class="card">
+        <h2>队伍列表</h2>
+        <div id="teamList" class="list"></div>
+      </section>
+
+      <section class="card">
+        <h2>项目列表</h2>
+        <div id="projectList" class="list"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEYS = {
+      teams: 'competition-teams',
+      projects: 'competition-projects'
+    };
+
+    const state = {
+      teams: JSON.parse(localStorage.getItem(STORAGE_KEYS.teams) || '[]'),
+      projects: JSON.parse(localStorage.getItem(STORAGE_KEYS.projects) || '[]')
+    };
+
+    const teamForm = document.getElementById('teamForm');
+    const projectForm = document.getElementById('projectForm');
+    const teamList = document.getElementById('teamList');
+    const projectList = document.getElementById('projectList');
+    const teamSelect = document.getElementById('teamSelect');
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEYS.teams, JSON.stringify(state.teams));
+      localStorage.setItem(STORAGE_KEYS.projects, JSON.stringify(state.projects));
+      render();
+    }
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function renderSummary() {
+      document.getElementById('teamCount').textContent = state.teams.length;
+      document.getElementById('projectCount').textContent = state.projects.length;
+      const pending = state.projects.filter(item => item.stage !== '答辩' && item.stage !== '测试').length;
+      document.getElementById('progressCount').textContent = pending;
+    }
+
+    function renderTeamSelect() {
+      teamSelect.innerHTML = '';
+      if (!state.teams.length) {
+        teamSelect.innerHTML = '<option value="">请先创建队伍</option>';
+        return;
+      }
+      teamSelect.innerHTML = '<option value="">请选择所属队伍</option>';
+      state.teams.forEach(team => {
+        const option = document.createElement('option');
+        option.value = team.id;
+        option.textContent = team.teamName;
+        teamSelect.appendChild(option);
+      });
+    }
+
+    function renderTeams() {
+      if (!state.teams.length) {
+        teamList.innerHTML = '<div class="empty">还没有队伍，先创建一个吧。</div>';
+        return;
+      }
+      teamList.innerHTML = state.teams.map(team => `
+        <div class="item">
+          <div class="item-header">
+            <div>
+              <h3>${team.teamName}</h3>
+              <div class="meta">队长：${team.captain} · 方向：${team.category}</div>
+            </div>
+            <button class="danger" data-action="delete-team" data-id="${team.id}">删除</button>
+          </div>
+          <div class="badge">成员：${team.members}</div>
+          <p>${team.description || '暂无说明'}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderProjects() {
+      if (!state.projects.length) {
+        projectList.innerHTML = '<div class="empty">还没有项目，先创建一个项目吧。</div>';
+        return;
+      }
+      projectList.innerHTML = state.projects.map(project => {
+        const team = state.teams.find(item => item.id === project.teamId);
+        return `
+          <div class="item">
+            <div class="item-header">
+              <div>
+                <h3>${project.projectName}</h3>
+                <div class="meta">所属队伍：${team ? team.teamName : '未知队伍'} · 截止：${project.deadline}</div>
+              </div>
+              <button class="danger" data-action="delete-project" data-id="${project.id}">删除</button>
+            </div>
+            <div class="badge">阶段：${project.stage}</div>
+            <p>${project.description || '暂无说明'}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function render() {
+      renderSummary();
+      renderTeamSelect();
+      renderTeams();
+      renderProjects();
+    }
+
+    teamForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const formData = new FormData(teamForm);
+      const team = {
+        id: uid(),
+        teamName: formData.get('teamName').toString().trim(),
+        captain: formData.get('captain').toString().trim(),
+        category: formData.get('category').toString(),
+        members: formData.get('members').toString().trim(),
+        description: formData.get('description').toString().trim()
+      };
+      if (!team.teamName || !team.captain || !team.members) return;
+      state.teams.unshift(team);
+      teamForm.reset();
+      saveState();
+    });
+
+    projectForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const formData = new FormData(projectForm);
+      const project = {
+        id: uid(),
+        projectName: formData.get('projectName').toString().trim(),
+        teamId: formData.get('teamId').toString(),
+        stage: formData.get('stage').toString(),
+        deadline: formData.get('deadline').toString(),
+        description: formData.get('description').toString().trim()
+      };
+      if (!project.projectName || !project.teamId || !project.deadline) return;
+      state.projects.unshift(project);
+      projectForm.reset();
+      saveState();
+    });
+
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      const { action, id } = button.dataset;
+      if (action === 'delete-team') {
+        state.teams = state.teams.filter(team => team.id !== id);
+        state.projects = state.projects.filter(project => project.teamId !== id);
+      }
+      if (action === 'delete-project') {
+        state.projects = state.projects.filter(project => project.id !== id);
+      }
+      saveState();
+    });
+
+    render();
+  </script>
+</body>
+</html>
